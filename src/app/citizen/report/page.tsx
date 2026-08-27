@@ -343,7 +343,7 @@ export default function CitizenReportPage() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Category (Optional - AI will auto-route)</Label>
-                        <Select value={selectedCategory} onValueChange={setSelectedCategory} disabled={isPending}>
+                        <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val ?? '')} disabled={isPending}>
                           <SelectTrigger id="category">
                             <SelectValue placeholder="Select or let AI detect" />
                           </SelectTrigger>

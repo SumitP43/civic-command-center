@@ -161,9 +161,9 @@ export default async function CitizenComplaintDetailPage({ params }: PageProps) 
                   {complaint.landmark && (
                     <p className="text-muted-foreground">Landmark: {complaint.landmark}</p>
                   )}
-                  {complaint.latitude && complaint.longitude && (
+                  {(complaint as any).latitude && (complaint as any).longitude && (
                     <p className="font-mono text-[10px] text-muted-foreground">
-                      Coordinates: {complaint.latitude.toFixed(5)}, {complaint.longitude.toFixed(5)}
+                      Coordinates: {Number((complaint as any).latitude).toFixed(5)}, {Number((complaint as any).longitude).toFixed(5)}
                     </p>
                   )}
                 </div>
