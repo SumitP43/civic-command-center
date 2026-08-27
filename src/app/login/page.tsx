@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Sparkles, Building2, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/admin/dashboard';
@@ -39,13 +39,6 @@ export default function LoginPage() {
         }
 
         if (data.user) {
-          // Fetch profile to redirect based on role
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
-
           const roleRouteMap: Record<string, string> = {
             citizen: '/citizen/dashboard',
             officer: '/officer/dashboard',
@@ -53,9 +46,21 @@ export default function LoginPage() {
             super_admin: '/admin/dashboard',
           };
 
-          const target = profile?.role ? roleRouteMap[profile.role] || redirectTo : redirectTo;
+          const userRole = data.user.user_metadata?.role;
+          let target = userRole && roleRouteMap[userRole] ? roleRouteMap[userRole] : null;
+
+          if (!target) {
+            // Fallback to profile query if not present in metadata
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', data.user.id)
+              .single();
+
+            target = profile?.role ? roleRouteMap[profile.role] || redirectTo : redirectTo;
+          }
+
           router.push(target);
-          router.refresh();
         }
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred');
@@ -223,3 +228,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <LoginFormContent />
+    </Suspense>
+  );
+}
+

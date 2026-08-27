@@ -48,15 +48,18 @@ export async function updateSession(request: NextRequest) {
 
   // If user exists, check role-based access
   if (user && !isPublicRoute) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    let role = user.user_metadata?.role;
+    if (!role) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      role = profile?.role;
+    }
 
-    if (profile) {
+    if (role) {
       const pathname = request.nextUrl.pathname;
-      const role = profile.role;
 
       // Role-based route protection
       const roleRouteMap: Record<string, string> = {
@@ -85,13 +88,17 @@ export async function updateSession(request: NextRequest) {
 
   // If authenticated user visits login/register, redirect to their dashboard
   if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    let role = user.user_metadata?.role;
+    if (!role) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      role = profile?.role;
+    }
 
-    if (profile) {
+    if (role) {
       const roleRouteMap: Record<string, string> = {
         citizen: '/citizen/dashboard',
         officer: '/officer/dashboard',
@@ -100,7 +107,7 @@ export async function updateSession(request: NextRequest) {
       };
 
       const url = request.nextUrl.clone();
-      url.pathname = roleRouteMap[profile.role] || '/citizen/dashboard';
+      url.pathname = roleRouteMap[role] || '/citizen/dashboard';
       return NextResponse.redirect(url);
     }
   }

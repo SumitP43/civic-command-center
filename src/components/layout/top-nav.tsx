@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { getInitials } from '@/lib/utils';
-import { logout } from '@/services/auth.service';
+import { createClient } from '@/lib/supabase/client';
 import { NotificationCenter } from '@/components/notifications/notification-center';
 import type { Profile } from '@/types';
 import Link from 'next/link';
@@ -30,6 +30,17 @@ export function TopNav({ user, notificationCount = 0 }: TopNavProps) {
   const router = useRouter();
 
   const profileHref = `/${user?.role === 'super_admin' ? 'admin' : user?.role || 'citizen'}/profile`;
+
+  const handleSignOut = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore network errors on sign out
+    }
+    router.push('/login');
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-md px-6">
@@ -89,7 +100,7 @@ export function TopNav({ user, notificationCount = 0 }: TopNavProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive cursor-pointer"
-              onClick={() => logout()}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
