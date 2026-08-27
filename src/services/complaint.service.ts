@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { processComplaintAI } from '@/services/ai-complaint.service';
-import { complaintSchema, type ComplaintFormData } from '@/lib/validators/complaint';
+import { complaintSchema, feedbackSchema, type ComplaintFormData, type FeedbackFormData } from '@/lib/validators/complaint';
 import type { ComplaintStatus, ComplaintWithRelations, Database } from '@/types';
 
 export type ComplaintResult = {
@@ -313,3 +313,46 @@ export async function assignComplaint(
 
   return {};
 }
+
+/**
+  * Submit citizen verification feedback on a resolved complaint
+  */
+export async function submitCitizenFeedback(formData: FeedbackFormData): Promise<{ error?: string }> {
+  const validated = feedbackSchema.safeParse(formData);
+  if (!validated.success) {
+    return { error: validated.error.issues[0]?.message || 'Invalid feedback details' };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // Insert feedback record
+  const { error: fbErr } = await supabase.from('feedback').insert({
+    complaint_id: validated.data.complaint_id,
+    citizen_id: user.id,
+    rating: validated.data.rating,
+    comment: validated.data.comment || null,
+    is_resolution_accepted: validated.data.is_resolution_accepted,
+  });
+
+  if (fbErr) {
+    return { error: fbErr.message };
+  }
+
+  // Update status based on acceptance
+  const nextStatus: ComplaintStatus = validated.data.is_resolution_accepted ? 'CLOSED' : 'REOPENED';
+  await updateComplaintStatus(
+    validated.data.complaint_id,
+    nextStatus,
+    validated.data.is_resolution_accepted
+      ? `Citizen accepted resolution with rating ${validated.data.rating}/5`
+      : `Citizen rejected resolution: ${validated.data.comment || 'Issue persists'}`
+  );
+
+  return {};
+}
+

@@ -145,15 +145,11 @@ export const DEPARTMENT_NAV: NavItem[] = [
 
 export const ADMIN_NAV: NavItem[] = [
   { title: 'Command Center', href: '/admin/dashboard', icon: 'layout-dashboard' },
-  { title: 'Complaints', href: '/admin/complaints', icon: 'file-text' },
-  { title: 'AI Review Queue', href: '/admin/ai-review', icon: 'shield' },
-  { title: 'Departments', href: '/admin/departments', icon: 'building-2' },
-  { title: 'Officers', href: '/admin/officers', icon: 'shield' },
-  { title: 'City Map', href: '/admin/map', icon: 'map' },
-  { title: 'Analytics', href: '/admin/analytics', icon: 'bar-chart-3' },
-  { title: 'AI Insights', href: '/admin/ai-insights', icon: 'brain' },
-  { title: 'Users', href: '/admin/users', icon: 'users' },
-  { title: 'Settings', href: '/admin/settings', icon: 'settings' },
+  { title: 'Live City Map', href: '/admin/map', icon: 'map' },
+  { title: 'Escalations Radar', href: '/admin/escalations', icon: 'alert-triangle' },
+  { title: 'AI Review Queue', href: '/admin/ai-review', icon: 'brain' },
+  { title: 'Department Dispatch', href: '/department/dashboard', icon: 'building-2' },
+  { title: 'Analytics & Trends', href: '/department/analytics', icon: 'bar-chart-3' },
 ];
 
 // ============================================================
