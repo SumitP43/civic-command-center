@@ -160,8 +160,9 @@ Open [http://localhost:3000](http://localhost:3000) to access the application.
 ---
 
 👨‍💻 Contributors
-Krish Saini - Backend & Database & AI Pipeline
-Sumit Pandey - Frontend & UI/UX & Officer Dashboard & Live City Incident Map
+
+- **Krish Saini** - Backend & Database & AI Pipeline
+- **Sumit Pandey** - Frontend & UI/UX & Officer Dashboard & Live City Incident Map
 
 ## 📄 License
 
